@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#d97706">
+    <title>MESON 2.0</title>
+    <style>
+        :root { --primary: #d97706; --primary-dark: #b45309; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --success: #16a34a; --danger: #dc2626; --info: #2563eb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+        header { background: var(--primary); color: white; padding: 14px; text-align: center; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; }
+        .tabs { display: flex; background: #fff; border-bottom: 2px solid #e2e8f0; position: sticky; top: 52px; z-index: 99; }
+        .tab { flex: 1; padding: 12px 2px; text-align: center; font-weight: 700; color: #64748b; cursor: pointer; font-size: 0.78rem; }
+        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #fffbeb; }
+        .container { padding: 12px; max-width: 650px; margin: 0 auto; }
+        .client-selector-box { background: white; padding: 12px; border-radius: 10px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .client-selector-box label { font-weight: 800; font-size: 0.9rem; display: block; margin-bottom: 6px; color: #334155; }
+        .client-search-row { display: flex; gap: 8px; }
+        .client-search-row input, .client-search-row select { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; }
+        
+        .main-menu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .menu-btn { background: var(--card); border: 2px solid #cbd5e1; border-radius: 12px; padding: 14px 4px; text-align: center; font-size: 0.9rem; font-weight: 800; cursor: pointer; }
+        .menu-btn.active { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        
+        .sub-menu { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+        .sub-btn { background: #e2e8f0; border: none; border-radius: 20px; padding: 9px 15px; font-weight: 700; color: #334155; cursor: pointer; white-space: nowrap; font-size: 0.85rem; }
+        .sub-btn.active { background: #1e293b; color: white; }
+        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 18px; }
+        .prod-card { background: var(--card); border-radius: 10px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; }
+        .prod-card:active { background: #fef3c7; border-color: var(--primary); }
+        .prod-name { font-weight: 700; margin-bottom: 4px; font-size: 0.9rem; }
+        .prod-price { color: var(--primary-dark); font-weight: 800; font-size: 0.9rem; }
+        .order-panel { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .order-title { font-weight: 800; font-size: 1rem; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; display: flex; justify-content: space-between; }
+        .order-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .order-controls { display: flex; align-items: center; gap: 8px; }
+        .qty-btn { background: #e2e8f0; border: none; width: 30px; height: 30px; border-radius: 8px; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+        .order-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; margin-top: 12px; padding-top: 10px; border-top: 2px solid #cbd5e1; }
+        .btn-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .btn-save { background: var(--success); color: white; border: none; padding: 14px 8px; border-radius: 10px; font-size: 0.95rem; font-weight: 800; cursor: pointer; }
+        .btn-fiar { background: var(--primary-dark); color: white; border: none; padding: 14px 8px; border-radius: 10px; font-size: 0.95rem; font-weight: 800; cursor: pointer; }
+        .editor-box { background: white; padding: 14px; border-radius: 12px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+        .editor-box h3 { font-size: 1rem; margin-bottom: 10px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+        .form-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .form-row select, .form-row input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; width: 100%; background: #fff; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; width: 100%; cursor: pointer; font-size: 0.9rem; }
+        .btn-export { background: var(--info); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.82rem; flex: 1; text-align: center; }
+        .btn-pdf { background: #dc2626; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.82rem; flex: 1; text-align: center; }
+        .export-bar { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .client-row { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; background: #fff; }
+        .client-row-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        .client-name-input { flex: 1; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 700; font-size: 0.88rem; }
+        .client-debt-badge { font-weight: 800; font-size: 0.9rem; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+        .debt-red { background: #fee2e2; color: #dc2626; }
+        .debt-green { background: #dcfce7; color: #16a34a; }
+        .client-row-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; font-size: 0.8rem; }
+        .btn-sm { padding: 6px 10px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; font-size: 0.78rem; }
+        .history-card { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
+        .history-header { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 6px; color: #1e293b; font-size: 0.9rem; }
+        .history-items { font-size: 0.88rem; color: #475569; margin-bottom: 8px; line-height: 1.4; }
+        .history-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 6px; font-size: 0.88rem; font-weight: 800; }
+        .summary-box { background: #1e293b; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .edit-item-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+        .edit-item-row input.edit-name { flex: 1; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 600; }
+        .edit-item-row input.edit-price { width: 70px; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 700; text-align: right; }
+        .btn-del-prod { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; }
+        .subcat-header { background: #f1f5f9; padding: 6px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; color: #475569; margin: 12px 0 6px 0; }
+        .hidden { display: none !important; }
+        @media print {
+            header, .tabs, .no-print, .btn-actions-grid { display: none !important; }
+            body { padding: 10px; background: white; color: black; font-size: 12pt; }
+            .container { max-width: 100%; padding: 0; }
+            .summary-box { background: #f1f5f9 !important; color: black !important; border: 1px solid #cbd5e1; }
+            .history-card { border: 1px solid #cbd5e1 !important; box-shadow: none; break-inside: avoid; margin-bottom: 8px; }
+            .client-row { border: 1px solid #cbd5e1 !important; break-inside: avoid; margin-bottom: 6px; }
+        }
+    </style>
+</head>
+<body>
+<header>☕ MESON 2.0</header>
+<div class="tabs no-print">
+    <div class="tab active" onclick="switchTab('pedidos')">📝 PEDIDO</div>
+    <div class="tab" onclick="switchTab('clientes')">👥 CLIENTES (<span id="client-count">0</span>)</div>
+    <div class="tab" onclick="switchTab('historial')">📋 HISTORIAL</div>
+    <div class="tab" onclick="switchTab('carta')">⚙️ CARTA</div>
+</div>
+
+<div id="view-pedidos" class="container">
+    <div class="client-selector-box">
+        <label>👤 Seleccionar Cliente de la Lista (o Mesa):</label>
+        <div class="client-search-row" style="margin-bottom: 8px;">
+            <input type="text" id="pedido-search-client" placeholder="🔍 Filtrar apellido o nombre..." oninput="filterOrderClientSelect()">
+        </div>
+        <div class="client-search-row">
+            <select id="pedido-client-select" onchange="updateSelectedClientDebtInfo()"></select>
+        </div>
+        <div id="selected-client-debt-banner" style="margin-top:8px; font-size:0.85rem; font-weight:700; color:#b45309;"></div>
+    </div>
+
+    <div class="main-menu">
+        <div id="btn-bebidas" class="menu-btn active" onclick="selectCategory('bebidas')">🥤 BEBIDAS</div>
+        <div id="btn-tostadas" class="menu-btn" onclick="selectCategory('tostadas')">🍞 TOSTADAS</div>
+        <div id="btn-otros" class="menu-btn" onclick="selectCategory('otros')">🍟 OTROS</div>
+    </div>
+
+    <div id="sub-menu" class="sub-menu"></div>
+    <div id="products-grid" class="products-grid"></div>
+
+    <div class="order-panel">
+        <div class="order-title">
+            <span>🛒 Comanda Actual</span>
+            <span id="order-client-label" style="color:var(--primary); font-size:0.85rem;"></span>
+        </div>
+        <div id="order-list"><p style="color: #94a3b8; text-align: center; padding: 10px 0;">Toca los productos arriba para añadirlos</p></div>
+        <div class="order-total"><span>TOTAL PEDIDO:</span><span id="order-total-price">0.00 €</span></div>
+        <div class="btn-actions-grid">
+            <button class="btn-save" onclick="saveOrder(false)">✅ PAGADO AL CONTADO</button>
+            <button class="btn-fiar" onclick="saveOrder(true)">📌 APUNTAR EN DEUDA</button>
+        </div>
+    </div>
+</div>
+
+<div id="view-clientes" class="container hidden">
+    <div class="summary-box">
+        <div>
+            <div style="font-size:0.8rem; color:#cbd5e1;" class="no-print">Deuda Total Acumulada (Todos):</div>
+            <div id="total-global-debt" style="font-size: 1.35rem; font-weight: 800; color: #f87171;">0.00 €</div>
+        </div>
+        <button class="btn-sm no-print" style="background:#334155; color:white;" onclick="filterDebtsOnly()">Ver Solo con Deuda</button>
+    </div>
+    <div class="export-bar no-print">
+        <button class="btn-export" onclick="exportClientsCSV()">💾 CSV</button>
+        <button class="btn-pdf" onclick="window.print()">📄 Exportar a PDF</button>
+        <button class="btn-export" style="background:#16a34a;" onclick="shareClientsWhatsApp()">📲 WhatsApp</button>
+    </div>
+    <div class="editor-box no-print">
+        <h3>➕ Alta de Nuevo Cliente</h3>
+        <div class="form-row">
+            <input type="text" id="new-client-name" placeholder="APELLIDOS Y NOMBRE (Ej: GARCIA LOPEZ JUAN)">
+            <input type="number" step="0.10" id="new-client-debt" placeholder="Deuda inicial en € (Opcional, ej: 0)">
+        </div>
+        <button class="btn-primary" onclick="createClient()">➕ Dar de Alta Cliente</button>
+    </div>
+    <div class="editor-box">
+        <h3>📋 Lista Oficial de Clientes</h3>
+        <div class="form-row no-print">
+            <input type="text" id="search-clients-list" placeholder="🔍 Buscar cliente por nombre o apellido..." oninput="renderClientsList()">
+        </div>
+        <div id="clients-db-list"></div>
+    </div>
+</div>
+
+<div id="view-historial" class="container hidden">
+    <div class="editor-box no-print">
+        <h3>🔍 Vista General o Individual por Cliente</h3>
+        <div class="form-row">
+            <select id="history-filter-client" onchange="updateHistoryUI()">
+                <option value="ALL">🌎 VER TODOS LOS CLIENTES (General)</option>
+            </select>
+        </div>
+        <div class="export-bar" style="margin-top:8px; margin-bottom:0;">
+            <button class="btn-export" onclick="exportHistoryCSV()">💾 CSV</button>
+            <button class="btn-pdf" onclick="window.print()">📄 Exportar a PDF</button>
+            <button class="btn-export" style="background:#16a34a;" onclick="shareHistoryText()">📲 WhatsApp</button>
+        </div>
+    </div>
+    <div class="summary-box">
+        <div>
+            <span id="hist-summary-label" style="font-size:0.85rem; color:#cbd5e1;" class="no-print">Total Pedidos Mostrados:</span>
+            <div id="caja-total" style="font-size: 1.25rem; font-weight: 800; color: #fbbf24;">0.00 €</div>
+        </div>
+        <div id="hist-client-debt-box" style="text-align:right;"></div>
+    </div>
+    <div id="history-list"></div>
+    <button class="btn-primary no-print" style="background:var(--danger); margin-top:14px;" onclick="clearHistory()">🗑️ Borrar Historial de Pedidos</button>
+</div>
+
+<div id="view-carta" class="container hidden">
+    <div class="editor-box">
+        <h3>➕ Crear Nuevo Producto en el Menú</h3>
+        <div class="form-row">
+            <select id="new-cat" onchange="updateNewSubcatOptions()">
+                <option value="bebidas">🥤 Apartado: BEBIDAS</option>
+                <option value="tostadas">🍞 Apartado: TOSTADAS</option>
+                <option value="otros">🍟 Apartado: OTROS / EXTRAS</option>
+            </select>
+            <select id="new-subcat"></select>
+            <input type="text" id="new-name" placeholder="Nombre del producto (ej: Croissant, Refresco...)">
+            <input type="number" step="0.05" id="new-price" placeholder="Precio en € (ej: 1.20)">
+        </div>
+        <button class="btn-primary" onclick="addNewProduct()">➕ Añadir Producto al Menú</button>
+    </div>
+    <div class="editor-box">
+        <h3>✏️ Modificar o Borrar Productos y Precios</h3>
+        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">Cambia cualquier texto o precio directamente aquí abajo y se guardará automáticamente.</p>
+        <div id="editor-catalog-list"></div>
+        <button class="btn-primary" style="background:#64748b; margin-top:16px;" onclick="resetCatalog()">🔄 Restaurar Carta con Precios Oficiales</button>
+    </div>
+</div>
+
+<!-- CARGAMOS EL ARCHIVO EXTERNO DE DATOS -->
+<script src="base_datos.js"></script>
+
+<script>
+    let clientsDB = JSON.parse(localStorage.getItem('meson2_clients_db')) || JSON.parse(JSON.stringify(initialClientsFromPhotos));
+    let catalog = JSON.parse(localStorage.getItem('meson2_catalog_v2')) || JSON.parse(JSON.stringify(defaultCatalog));
+    let orderHistory = JSON.parse(localStorage.getItem('meson2_history') || '[]');
+    let currentCategory = 'bebidas';
+    let currentSubcategory = Object.keys(catalog.bebidas)[0];
+    let currentOrder = [];
+    let showOnlyDebtors = false;
+
+    function saveAllData() {
+        localStorage.setItem('meson2_clients_db', JSON.stringify(clientsDB));
+        localStorage.setItem('meson2_catalog_v2', JSON.stringify(catalog));
+        localStorage.setItem('meson2_history', JSON.stringify(orderHistory));
+        document.getElementById('client-count').innerText = clientsDB.length;
+    }
+
+    function init() {
+        saveAllData();
+        populateOrderClientSelect();
+        populateHistoryClientSelect();
+        selectCategory('bebidas');
+        updateHistoryUI();
+        updateNewSubcatOptions();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        ['pedidos', 'clientes', 'historial', 'carta'].forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
+        if (tab === 'pedidos') {
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('view-pedidos').classList.remove('hidden');
+            populateOrderClientSelect(); renderProducts();
+        } else if (tab === 'clientes') {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('view-clientes').classList.remove('hidden');
+            renderClientsList();
+        } else if (tab === 'historial') {
+            document.querySelectorAll('.tab')[2].classList.add('active');
+            document.getElementById('view-historial').classList.remove('hidden');
+            populateHistoryClientSelect(); updateHistoryUI();
+        } else {
+            document.querySelectorAll('.tab')[3].classList.add('active');
+            document.getElementById('view-carta').classList.remove('hidden');
+            renderCatalogEditor();
+        }
+    }
+
+    function populateOrderClientSelect(filterText = '') {
+        const select = document.getElementById('pedido-client-select');
+        const currentVal = select.value;
+        select.innerHTML = '';
+        const q = filterText.trim().toLowerCase();
+        const filtered = clientsDB.filter(c => c.name.toLowerCase().includes(q));
+        filtered.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            const debtText = c.debt > 0 ? ' (Debe: ' + Number(c.debt).toFixed(2) + ' €)' : '';
+            opt.innerText = c.name + debtText;
+            select.appendChild(opt);
+        });
+        if (filtered.some(c => c.id === currentVal)) select.value = currentVal;
+        updateSelectedClientDebtInfo();
+    }
+
+    function filterOrderClientSelect() {
+        populateOrderClientSelect(document.getElementById('pedido-search-client').value);
+    }
+
+    function updateSelectedClientDebtInfo() {
+        const select = document.getElementById('pedido-client-select');
+        const client = clientsDB.find(c => c.id === select.value);
+        const banner = document.getElementById('selected-client-debt-banner');
+        const label = document.getElementById('order-client-label');
+        if (client) {
+            label.innerText = client.name;
+            banner.innerHTML = client.debt > 0 
+                ? '⚠️ Deuda acumulada actual: <span style="color:#dc2626">' + Number(client.debt).toFixed(2) + ' €</span>'
+                : '<span style="color:#16a34a">✔ Cliente al corriente de pago (0.00 €)</span>';
+        } else {
+            banner.innerText = ''; label.innerText = '';
+        }
+    }
+
+    function selectCategory(cat) {
+        currentCategory = cat;
+        document.getElementById('btn-bebidas').classList.toggle('active', cat === 'bebidas');
+        document.getElementById('btn-tostadas').classList.toggle('active', cat === 'tostadas');
+        document.getElementById('btn-otros').classList.toggle('active', cat === 'otros');
+        const subCategories = Object.keys(catalog[cat]);
+        currentSubcategory = subCategories[0];
+        renderSubMenu(subCategories); renderProducts();
+    }
+
+    function renderSubMenu(subCategories) {
+        const subMenuEl = document.getElementById('sub-menu');
+        subMenuEl.innerHTML = '';
+        subCategories.forEach(sub => {
+            const btn = document.createElement('button');
+            btn.className = 'sub-btn ' + (sub === currentSubcategory ? 'active' : '');
+            btn.innerText = sub;
+            btn.onclick = () => { currentSubcategory = sub; renderSubMenu(subCategories); renderProducts(); };
+            subMenuEl.appendChild(btn);
+        });
+    }
+
+    function renderProducts() {
+        const grid = document.getElementById('products-grid');
+        grid.innerHTML = '';
+        (catalog[currentCategory][currentSubcategory] || []).forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'prod-card';
+            card.onclick = () => addToOrder(item);
+            card.innerHTML = '<div class="prod-name">' + item.name + '</div><div class="prod-price">' + Number(item.price).toFixed(2) + ' €</div>';
+            grid.appendChild(card);
+        });
+    }
+
+    function addToOrder(product) {
+        const existing = currentOrder.find(i => i.id === product.id);
+        if (existing) { existing.qty += 1; existing.name = product.name; existing.price = Number(product.price); }
+        else { currentOrder.push({ id: product.id, name: product.name, price: Number(product.price), qty: 1 }); }
+        renderOrder();
+    }
+
+    function changeQty(id, delta) {
+        const idx = currentOrder.findIndex(i => i.id === id);
+        if (idx > -1) { currentOrder[idx].qty += delta; if (currentOrder[idx].qty <= 0) currentOrder.splice(idx, 1); }
+        renderOrder();
+    }
+
+    function renderOrder() {
+        const list = document.getElementById('order-list');
+        const totalEl = document.getElementById('order-total-price');
+        if (currentOrder.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 10px 0;">Toca los productos arriba para añadirlos</p>';
+            totalEl.innerText = '0.00 €'; return;
+        }
+        let html = '', total = 0;
+        currentOrder.forEach(item => {
+            total += item.price * item.qty;
+            html += '<div class="order-item"><div><strong>' + item.name + '</strong><br><small style="color:#64748b">' + item.price.toFixed(2) + ' € c/u</small></div><div class="order-controls"><button class="qty-btn" onclick="changeQty(\'' + item.id + '\', -1)">-</button><span style="font-weight:800; min-width:20px; text-align:center;">' + item.qty + '</span><button class="qty-btn" onclick="changeQty(\'' + item.id + '\', 1)">+</button></div></div>';
+        });
+        list.innerHTML = html; totalEl.innerText = total.toFixed(2) + ' €';
+    }
+
+    function saveOrder(isCredit) {
+        if (currentOrder.length === 0) { alert('Añade al menos un producto al pedido.'); return; }
+        const clientId = document.getElementById('pedido-client-select').value;
+        const clientObj = clientsDB.find(c => c.id === clientId);
+        const clientName = clientObj ? clientObj.name : 'BARRA GENERAL';
+        const total = currentOrder.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const now = new Date();
+        const timeStr = now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        if (isCredit && clientObj) clientObj.debt = Number((Number(clientObj.debt) + total).toFixed(2));
+        orderHistory.unshift({ id: Date.now(), clientId: clientId, mesa: clientName, date: timeStr, items: [...currentOrder], total: total, status: isCredit ? 'DEUDA' : 'PAGADO' });
+        saveAllData(); currentOrder = []; document.getElementById('pedido-search-client').value = '';
+        populateOrderClientSelect(); renderOrder();
+        alert(isCredit ? '📌 Apuntado en deuda de ' + clientName + ' (+' + total.toFixed(2) + ' €)' : '✅ Pedido cobrado a ' + clientName + ' (' + total.toFixed(2) + ' €)');
+    }
+
+    function renderClientsList() {
+        const container = document.getElementById('clients-db-list');
+        const q = (document.getElementById('search-clients-list').value || '').trim().toLowerCase();
+        let totalGlobalDebt = 0;
+        clientsDB.forEach(c => totalGlobalDebt += Number(c.debt || 0));
+        document.getElementById('total-global-debt').innerText = totalGlobalDebt.toFixed(2) + ' €';
+        let html = '';
+        clientsDB.forEach(client => {
+            if (q && !client.name.toLowerCase().includes(q)) return;
+            if (showOnlyDebtors && Number(client.debt) <= 0) return;
+            const hasDebt = Number(client.debt) > 0;
+            html += '<div class="client-row"><div class="client-row-top"><input type="text" class="client-name-input" value="' + client.name.replace(/"/g, '&quot;') + '" onchange="updateClientName(\'' + client.id + '\', this.value)"><span class="client-debt-badge ' + (hasDebt ? 'debt-red' : 'debt-green') + '">' + (hasDebt ? 'Debe: ' + Number(client.debt).toFixed(2) + ' €' : '0.00 €') + '</span></div><div class="client-row-actions no-print"><button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="viewClientIndividualHistory(\'' + client.id + '\')">📋 Pedidos</button><button class="btn-sm" style="background:#fef3c7; color:#b45309;" onclick="adjustClientDebt(\'' + client.id + '\')">💶 Modificar Deuda</button><button class="btn-sm" style="background:#dcfce7; color:#15803d;" onclick="clearClientDebt(\'' + client.id + '\')">✔ Liquidar</button><button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteClient(\'' + client.id + '\')">🗑️</button></div></div>';
+        });
+        container.innerHTML = html || '<p style="text-align:center; color:#94a3b8; padding:15px;">No hay clientes con ese filtro.</p>';
+    }
+
+    function filterDebtsOnly() { showOnlyDebtors = !showOnlyDebtors; renderClientsList(); }
+
+    function createClient() {
+        const nameEl = document.getElementById('new-client-name');
+        const debtEl = document.getElementById('new-client-debt');
+        const name = nameEl.value.trim().toUpperCase();
+        const debt = parseFloat(debtEl.value) || 0;
+        if (!name) { alert('Escribe el nombre del cliente.'); return; }
+        clientsDB.unshift({ id: 'cli_' + Date.now(), name: name, debt: Number(debt.toFixed(2)) });
+        saveAllData(); nameEl.value = ''; debtEl.value = ''; renderClientsList();
+        alert('✅ Cliente dado de alta: ' + name);
+    }
+
+    function updateClientName(id, newName) {
+        const client = clientsDB.find(c => c.id === id);
+        if (client && newName.trim() !== '') { client.name = newName.trim().toUpperCase(); saveAllData(); }
+    }
+
+    function adjustClientDebt(id) {
+        const client = clientsDB.find(c => c.id === id);
+        if (!client) return;
+        const nuevoValor = prompt('Modificar deuda total de ' + client.name + ' (en €):', Number(client.debt).toFixed(2));
+        if (nuevoValor !== null) {
+            const num = parseFloat(nuevoValor.replace(',', '.'));
+            if (!isNaN(num) && num >= 0) { client.debt = Number(num.toFixed(2)); saveAllData(); renderClientsList(); }
+        }
+    }
+
+    function clearClientDebt(id) {
+        const client = clientsDB.find(c => c.id === id);
+        if (!client || client.debt <= 0) return;
+        if (confirm('¿Confirmas que ' + client.name + ' ha pagado su deuda de ' + Number(client.debt).toFixed(2) + ' €?')) {
+            orderHistory.unshift({ id: Date.now(), clientId: client.id, mesa: client.name, date: new Date().toLocaleDateString('es-ES') + ' ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), items: [{ name: 'PAGO DE DEUDA ACUMULADA', qty: 1, price: client.debt }], total: Number(client.debt), status: 'LIQUIDADO' });
+            client.debt = 0; saveAllData(); renderClientsList();
+        }
+    }
+
+    function deleteClient(id) {
+        const client = clientsDB.find(c => c.id === id);
+        if (client && confirm('¿Dar de baja a "' + client.name + '"?')) {
+            clientsDB = clientsDB.filter(c => c.id !== id); saveAllData(); renderClientsList();
+        }
+    }
+
+    function viewClientIndividualHistory(clientId) {
+        switchTab('historial'); document.getElementById('history-filter-client').value = clientId; updateHistoryUI();
+    }
+
+    function populateHistoryClientSelect() {
+        const select = document.getElementById('history-filter-client');
+        const currentVal = select.value || 'ALL';
+        select.innerHTML = '<option value="ALL">🌎 VER TODOS LOS CLIENTES (General)</option>';
+        clientsDB.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.innerText = '👤 ' + c.name + (c.debt > 0 ? ' (Debe: ' + c.debt.toFixed(2) + '€)' : '');
+            select.appendChild(opt);
+        });
+        select.value = currentVal;
+    }
+
+    function updateHistoryUI() {
+        const filterVal = document.getElementById('history-filter-client').value;
+        const histList = document.getElementById('history-list');
+        const cajaTotalEl = document.getElementById('caja-total');
+        const debtBox = document.getElementById('hist-client-debt-box');
+        const filteredOrders = filterVal === 'ALL' ? orderHistory : orderHistory.filter(o => o.clientId === filterVal);
+        if (filterVal !== 'ALL') {
+            const clientObj = clientsDB.find(c => c.id === filterVal);
+            if (clientObj) debtBox.innerHTML = '<div style="font-size:0.8rem; color:#cbd5e1;">Deuda Pendiente:</div><div style="font-size:1.2rem; font-weight:800; color:#f87171;">' + Number(clientObj.debt).toFixed(2) + ' €</div>';
+        } else { debtBox.innerHTML = ''; }
+        if (filteredOrders.length === 0) {
+            histList.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 25px 0;">No hay pedidos registrados para esta selección.</p>';
+            cajaTotalEl.innerText = '0.00 €'; return;
+        }
+        let totalSum = 0, html = '';
+        filteredOrders.forEach(order => {
+            totalSum += Number(order.total);
+            const itemsSummary = order.items.map(i => i.qty + 'x ' + i.name).join(', ');
+            const badgeColor = order.status === 'DEUDA' ? '#dc2626' : '#16a34a';
+            html += '<div class="history-card" style="border-left-color:' + badgeColor + '"><div class="history-header"><span>👤 ' + order.mesa + '</span><span>🕒 ' + order.date + '</span></div><div class="history-items">' + itemsSummary + '</div><div class="history-footer"><span style="color:' + badgeColor + '">' + (order.status || 'PAGADO') + '</span><span>Importe: <strong>' + Number(order.total).toFixed(2) + ' €</strong></span></div></div>';
+        });
+        histList.innerHTML = html; cajaTotalEl.innerText = totalSum.toFixed(2) + ' €';
+    }
+
+    function clearHistory() {
+        if (confirm('¿Borrar el historial de pedidos guardados?')) { orderHistory = []; saveAllData(); updateHistoryUI(); }
+    }
+
+    function downloadFile(filename, content, mimeType) {
+        const blob = new Blob(["\uFEFF" + content], { type: mimeType });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    function exportClientsCSV() {
+        let csv = 'CLIENTE;DEUDA PENDIENTE (EUR)\n';
+        clientsDB.forEach(c => { csv += '"' + c.name + '";' + Number(c.debt).toFixed(2) + '\n'; });
+        downloadFile('Clientes_Meson2.0.csv', csv, 'text/csv;charset=utf-8;');
+    }
+
+    function shareClientsWhatsApp() {
+        let text = '📋 *LISTA DE DEUDAS - MESON 2.0*\n\n';
+        const debtors = clientsDB.filter(c => Number(c.debt) > 0);
+        if (debtors.length === 0) text += 'Todos los clientes están al día (0.00 €).';
+        else debtors.forEach(c => { text += '• ' + c.name + ': *' + Number(c.debt).toFixed(2) + ' €*\n'; });
+        if (navigator.share) navigator.share({ title: 'Clientes MESON 2.0', text: text });
+        else { navigator.clipboard.writeText(text); alert('✅ Copiado al portapapeles listo para pegar en WhatsApp.'); }
+    }
+
+    function exportHistoryCSV() {
+        const filterVal = document.getElementById('history-filter-client').value;
+        const orders = filterVal === 'ALL' ? orderHistory : orderHistory.filter(o => o.clientId === filterVal);
+        let csv = 'FECHA;CLIENTE;PRODUCTOS;ESTADO;TOTAL (EUR)\n';
+        orders.forEach(o => {
+            const prods = o.items.map(i => i.qty + 'x ' + i.name).join(' + ');
+            csv += '"' + o.date + '";"' + o.mesa + '";"' + prods + '";"' + (o.status || 'PAGADO') + '";' + Number(o.total).toFixed(2) + '\n';
+        });
+        downloadFile('Historial_Pedidos_Meson2.0.csv', csv, 'text/csv;charset=utf-8;');
+    }
+
+    function shareHistoryText() {
+        const filterVal = document.getElementById('history-filter-client').value;
+        const orders = filterVal === 'ALL' ? orderHistory : orderHistory.filter(o => o.clientId === filterVal);
+        let text = '☕ *HISTORIAL DE PEDIDOS - MESON 2.0*\n\n';
+        orders.slice(0, 40).forEach(o => {
+            const prods = o.items.map(i => i.qty + 'x ' + i.name).join(', ');
+            text += '📅 ' + o.date + ' - *' + o.mesa + '*\n   ' + prods + ' -> *' + Number(o.total).toFixed(2) + ' €* (' + (o.status || 'PAGADO') + ')\n\n';
+        });
+        if (navigator.share) navigator.share({ title: 'Historial MESON 2.0', text: text });
+        else { navigator.clipboard.writeText(text); alert('✅ Copiado al portapapeles listo para pegar en WhatsApp.'); }
+    }
+
+    function updateNewSubcatOptions() {
+        const cat = document.getElementById('new-cat').value;
+        const subSelect = document.getElementById('new-subcat');
+        subSelect.innerHTML = '';
+        Object.keys(catalog[cat]).forEach(sub => {
+            const opt = document.createElement('option'); opt.value = sub; opt.innerText = sub; subSelect.appendChild(opt);
+        });
+    }
+
+    function addNewProduct() {
+        const cat = document.getElementById('new-cat').value;
+        const sub = document.getElementById('new-subcat').value;
+        const name = document.getElementById('new-name').value.trim();
+        const price = parseFloat(document.getElementById('new-price').value);
+        if (!name || isNaN(price) || price < 0) { alert('Escribe un nombre y precio válidos.'); return; }
+        catalog[cat][sub].push({ id: 'prod_' + Date.now(), name: name, price: price });
+        saveAllData(); document.getElementById('new-name').value = ''; document.getElementById('new-price').value = '';
+        renderCatalogEditor(); alert('✅ Producto añadido al menú');
+    }
+
+    function renderCatalogEditor() {
+        const container = document.getElementById('editor-catalog-list');
+        let html = '';
+        const titles = { bebidas: '🥤 BEBIDAS', tostadas: '🍞 TOSTADAS (Medias y Enteras)', otros: '🍟 OTROS / EXTRAS' };
+        ['bebidas', 'tostadas', 'otros'].forEach(cat => {
+            html += '<h4 style="margin-top:14px; color:#d97706;">' + titles[cat] + '</h4>';
+            Object.keys(catalog[cat]).forEach(sub => {
+                html += '<div class="subcat-header">' + sub + '</div>';
+                catalog[cat][sub].forEach((item, index) => {
+                    html += '<div class="edit-item-row"><input type="text" class="edit-name" value="' + item.name.replace(/"/g, '&quot;') + '" onchange="updateProduct(\'' + cat + '\', \'' + sub + '\', ' + index + ', \'name\', this.value)"><input type="number" step="0.05" class="edit-price" value="' + Number(item.price).toFixed(2) + '" onchange="updateProduct(\'' + cat + '\', \'' + sub + '\', ' + index + ', \'price\', this.value)"><span>€</span><button class="btn-del-prod" onclick="deleteProduct(\'' + cat + '\', \'' + sub + '\', ' + index + ')">🗑️</button></div>';
+                });
+            });
+        });
+        container.innerHTML = html;
+    }
+
+    function updateProduct(cat, sub, index, field, value) {
+        if (field === 'price') {
+            const num = parseFloat(value); if (!isNaN(num) && num >= 0) catalog[cat][sub][index].price = num;
+        } else if (value.trim() !== '') { catalog[cat][sub][index].name = value.trim(); }
+        saveAllData();
+    }
+
+    function deleteProduct(cat, sub, index) {
+        if (confirm('¿Eliminar este producto de la carta?')) {
+            catalog[cat][sub].splice(index, 1); saveAllData(); renderCatalogEditor();
+        }
+    }
+
+    function resetCatalog() {
+        if (confirm('¿Restaurar los productos y precios originales?')) {
+            catalog = JSON.parse(JSON.stringify(defaultCatalog)); saveAllData(); renderCatalogEditor();
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
